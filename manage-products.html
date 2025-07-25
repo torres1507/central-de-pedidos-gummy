@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Produtos - Color Cart Buddy</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        
+        .back-button:hover {
+            color: var(--primary-hover);
+        }
+        
+        .product-manager {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .product-list, .product-form {
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        
+        .product-list h2, .product-form h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .product-table th,
+        .product-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .product-table th {
+            background: var(--background-color);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .product-table td {
+            color: var(--text-secondary);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-button {
+            padding: 0.25rem 0.75rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-edit {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: var(--primary-hover);
+        }
+        
+        .btn-delete {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #e53e3e;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .product-manager {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .product-list, .product-form {
+                padding: 1.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Voltar ao Início
+        </a>
+
+        <header class="hero-section">
+            <h1>Gerenciar Produtos</h1>
+            <p>Adicione, edite ou remova produtos do catálogo da empresa</p>
+        </header>
+
+        <div class="product-manager">
+            <!-- Product List Section -->
+            <section class="product-list">
+                <h2>Lista de Produtos</h2>
+                <table class="product-table" id="productTable">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Preço</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Products will be loaded here -->
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Product Form Section -->
+            <section class="product-form">
+                <h2 id="formTitle">Adicionar Produto</h2>
+                <form id="productForm">
+                    <input type="hidden" id="editingProductId" value="">
+                    
+                    <div class="form-group">
+                        <label for="productName">Nome do Produto *</label>
+                        <input type="text" id="productName" name="productName" required placeholder="Ex: Tinta Acrílica Azul 18L">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productPrice">Preço (R$) *</label>
+                        <input type="number" id="productPrice" name="productPrice" step="0.01" min="0" required placeholder="Ex: 52.50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productDescription">Descrição</label>
+                        <textarea id="productDescription" name="productDescription" rows="3" placeholder="Descrição opcional do produto"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%;" id="submitButton">
+                        Adicionar Produto
+                    </button>
+                    
+                    <button type="button" class="btn btn-secondary" style="width: 100%; margin-top: 0.5rem; display: none;" id="cancelButton">
+                        Cancelar Edição
+                    </button>
+                </form>
+            </section>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeProductManager();
+        });
+
+        function initializeProductManager() {
+            // Initialize default products if none exist
+            initializeDefaultProducts();
+            
+            // Load and render products
+            renderProducts();
+
+            // Setup form submission
+            const form = document.getElementById('productForm');
+            form.addEventListener('submit', handleFormSubmit);
+
+            // Setup cancel button
+            const cancelButton = document.getElementById('cancelButton');
+            cancelButton.addEventListener('click', cancelEdit);
+        }
+
+        function initializeDefaultProducts() {
+            const existingProducts = getProducts();
+            if (existingProducts.length === 0) {
+                const defaultProducts = [
+                    { id: 1, name: 'Tinta Látex Branca 18L', price: 45.90, description: 'Tinta látex para paredes internas' },
+                    { id: 2, name: 'Tinta Acrílica Azul 18L', price: 52.50, description: 'Tinta acrílica de alta qualidade' },
+                    { id: 3, name: 'Tinta Esmalte Verde 3.6L', price: 38.75, description: 'Esmalte sintético para madeira e metal' },
+                    { id: 4, name: 'Verniz Incolor 900ml', price: 29.90, description: 'Verniz transparente para proteção' },
+                    { id: 5, name: 'Primer Branco 18L', price: 41.20, description: 'Primer para preparação de superfícies' },
+                    { id: 6, name: 'Tinta Magnética 500ml', price: 67.80, description: 'Tinta especial com propriedades magnéticas' }
+                ];
+                saveProducts(defaultProducts);
+            }
+        }
+
+        function getProducts() {
+            return window.ColorCartBuddy ? window.ColorCartBuddy.getFromLocalStorage('products') || [] : [];
+        }
+
+        function saveProducts(products) {
+            if (window.ColorCartBuddy) {
+                window.ColorCartBuddy.saveToLocalStorage('products', products);
+            }
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('productName').value.trim();
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const description = document.getElementById('productDescription').value.trim();
+            const editingId = document.getElementById('editingProductId').value;
+
+            if (!name || isNaN(price) || price < 0) {
+                if (window.ColorCartBuddy) {
+                    window.ColorCartBuddy.showErrorMessage('Preencha os campos obrigatórios corretamente.');
+                }
+                return;
+            }
+
+            const product = {
+                id: editingId ? parseInt(editingId) : Date.now(),
+                name,
+                price,
+                description
+            };
+
+            const products = getProducts();
+            
+            if (editingId) {
+                // Update existing product
+                const index = products.findIndex(p => p.id === parseInt(editingId));
+                if (index !== -1) {
+                    products[index] = product;
+                    saveProducts(products);
+                    if (window.ColorCartBuddy) {
+                        window.ColorCartBuddy.showSuccessMessage('Produto atualizado com sucesso!');
+                    }
+                }
+            } else {
+                // Add new product
+                products.push(product);
+                saveProducts(products);
+                if (window.ColorCartBuddy) {
+                    window.ColorCartBuddy.showSuccessMessage('Produto adicionado com sucesso!');
+                }
+            }
+
+            resetForm();
+            renderProducts();
+        }
+
+        function editProduct(productId) {
+            const products = getProducts();
+            const product = products.find(p => p.id === productId);
+            
+            if (product) {
+                document.getElementById('editingProductId').value = product.id;
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productDescription').value = product.description || '';
+                
+                document.getElementById('formTitle').textContent = 'Editar Produto';
+                document.getElementById('submitButton').textContent = 'Atualizar Produto';
+                document.getElementById('cancelButton').style.display = 'block';
+            }
+        }
+
+        function deleteProduct(productId) {
+            if (confirm('Deseja realmente excluir este produto?')) {
+                let products = getProducts();
+                products = products.filter(p => p.id !== productId);
+                saveProducts(products);
+                renderProducts();
+                
+                if (window.ColorCartBuddy) {
+                    window.ColorCartBuddy.showSuccessMessage('Produto removido com sucesso!');
+                }
+            }
+        }
+
+        function cancelEdit() {
+            resetForm();
+        }
+
+        function resetForm() {
+            document.getElementById('productForm').reset();
+            document.getElementById('editingProductId').value = '';
+            document.getElementById('formTitle').textContent = 'Adicionar Produto';
+            document.getElementById('submitButton').textContent = 'Adicionar Produto';
+            document.getElementById('cancelButton').style.display = 'none';
+        }
+
+        function renderProducts() {
+            const products = getProducts();
+            const tbody = document.querySelector('#productTable tbody');
+            tbody.innerHTML = '';
+
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Nenhum produto cadastrado</td></tr>';
+                return;
+            }
+
+            products.forEach(product => {
+                const tr = document.createElement('tr');
+
+                // Product name column
+                const tdName = document.createElement('td');
+                tdName.textContent = product.name;
+                tr.appendChild(tdName);
+
+                // Product price column
+                const tdPrice = document.createElement('td');
+                tdPrice.textContent = `R$ ${product.price.toFixed(2).replace('.', ',')}`;
+                tr.appendChild(tdPrice);
+
+                // Actions column
+                const tdActions = document.createElement('td');
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'action-buttons';
+
+                // Edit button
+                const btnEdit = document.createElement('button');
+                btnEdit.textContent = 'Editar';
+                btnEdit.className = 'action-button btn-edit';
+                btnEdit.addEventListener('click', () => editProduct(product.id));
+                actionsDiv.appendChild(btnEdit);
+
+                // Delete button
+                const btnDelete = document.createElement('button');
+                btnDelete.textContent = 'Excluir';
+                btnDelete.className = 'action-button btn-delete';
+                btnDelete.addEventListener('click', () => deleteProduct(product.id));
+                actionsDiv.appendChild(btnDelete);
+
+                tdActions.appendChild(actionsDiv);
+                tr.appendChild(tdActions);
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
