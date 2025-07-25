@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pedidos Realizados - Color Cart Buddy</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .back-button:hover {
+            color: var(--primary-hover);
+        }
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .dashboard {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .dashboard-card {
+            flex: 1 1 200px;
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+        .dashboard-card h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        .dashboard-card p {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .search-container {
+            margin-bottom: 1.5rem;
+        }
+        .search-container input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+        }
+        .search-container input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        th, td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+        th {
+            background: var(--background-color);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        td {
+            color: var(--text-secondary);
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: white;
+            display: inline-block;
+        }
+        .status-pendente {
+            background-color: #f56565;
+        }
+        .status-realizado {
+            background-color: #48bb78;
+        }
+        .status-toggle-btn {
+            margin-left: 1rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            background-color: var(--primary-color);
+            color: white;
+            transition: background-color 0.2s ease;
+        }
+        .status-toggle-btn:hover {
+            background-color: var(--primary-hover);
+        }
+        .delete-btn {
+            margin-left: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            background-color: #f56565;
+            color: white;
+            transition: background-color 0.2s ease;
+        }
+        .delete-btn:hover {
+            background-color: #e53e3e;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            table, th, td {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Voltar ao Início
+        </a>
+
+        <header class="page-header">
+            <h1>Pedidos Realizados</h1>
+            <p>Visualize e gerencie os pedidos realizados</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="dashboard-card">
+                <h3>Pedidos Pendentes</h3>
+                <p id="pendingCount">0</p>
+                <p id="pendingTotal" style="font-size:1rem; margin-top:0.5rem; color: var(--text-secondary);">Total: R$ 0,00</p>
+            </div>
+            <div class="dashboard-card">
+                <h3>Pedidos Realizados</h3>
+                <p id="completedCount">0</p>
+                <p id="completedTotal" style="font-size:1rem; margin-top:0.5rem; color: var(--text-secondary);">Total: R$ 0,00</p>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchCNPJ" placeholder="Pesquisar por CNPJ..." />
+        </div>
+
+        <table id="ordersTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>CNPJ</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Orders will be dynamically loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrders();
+            const searchCNPJ = document.getElementById('searchCNPJ');
+            searchCNPJ.addEventListener('input', filterOrdersByCNPJ);
+            searchCNPJ.addEventListener('input', formatCNPJInput);
+        });
+
+        function getOrders() {
+            if (window.ColorCartBuddy) {
+                return window.ColorCartBuddy.getFromLocalStorage('orders') || [];
+            }
+            return [];
+        }
+
+        function saveOrders(orders) {
+            if (window.ColorCartBuddy) {
+                window.ColorCartBuddy.saveToLocalStorage('orders', orders);
+            }
+        }
+
+        function loadOrders() {
+            const orders = getOrders();
+            renderOrders(orders);
+            updateDashboard(orders);
+        }
+
+        function renderOrders(orders) {
+            const tbody = document.querySelector('#ordersTable tbody');
+            tbody.innerHTML = '';
+
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Nenhum pedido encontrado</td></tr>';
+                return;
+            }
+
+            orders.forEach(order => {
+                const tr = document.createElement('tr');
+
+                const tdId = document.createElement('td');
+                tdId.textContent = order.id;
+                tr.appendChild(tdId);
+
+                const tdCliente = document.createElement('td');
+                tdCliente.textContent = order.customerName || '-';
+                tr.appendChild(tdCliente);
+
+                const tdCNPJ = document.createElement('td');
+                tdCNPJ.textContent = order.cnpj || '-';
+                tr.appendChild(tdCNPJ);
+
+                const tdData = document.createElement('td');
+                tdData.textContent = order.date || '-';
+                tr.appendChild(tdData);
+
+                const tdStatus = document.createElement('td');
+                const statusSpan = document.createElement('span');
+                statusSpan.classList.add('status-badge');
+                if (order.status === 'Realizado') {
+                    statusSpan.classList.add('status-realizado');
+                    statusSpan.textContent = 'Realizado';
+                } else {
+                    statusSpan.classList.add('status-pendente');
+                    statusSpan.textContent = 'Pendente';
+                }
+                tdStatus.appendChild(statusSpan);
+                tr.appendChild(tdStatus);
+
+                const tdActions = document.createElement('td');
+                const actionContainer = document.createElement('div');
+                actionContainer.className = 'action-buttons';
+                
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = 'status-toggle-btn';
+                toggleBtn.textContent = order.status === 'Realizado' ? 'Marcar como Pendente' : 'Marcar como Realizado';
+                toggleBtn.addEventListener('click', () => {
+                    toggleOrderStatus(order.id);
+                });
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = 'Excluir';
+                deleteBtn.addEventListener('click', () => {
+                    deleteOrder(order.id);
+                });
+                
+                actionContainer.appendChild(toggleBtn);
+                actionContainer.appendChild(deleteBtn);
+                tdActions.appendChild(actionContainer);
+                tr.appendChild(tdActions);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function formatCurrency(value) {
+            return 'R$ ' + value.toFixed(2).replace('.', ',');
+        }
+
+        function parseCurrency(formatted) {
+            // If already a number, return it
+            if (typeof formatted === 'number') return formatted;
+            // Remove "R$" and replace comma with dot for parsing
+            const num = parseFloat(formatted.replace('R$', '').trim().replace(',', '.'));
+            return isNaN(num) ? 0 : num;
+        }
+
+        function updateDashboard(orders) {
+            // Filter orders by status
+            const pendingOrders = orders.filter(o => o.status === 'Pendente');
+            const completedOrders = orders.filter(o => o.status === 'Realizado');
+
+            // Count orders per category
+            const pendingCount = pendingOrders.length;
+            const completedCount = completedOrders.length;
+
+            // Sum the total values per category
+            let pendingTotal = 0, completedTotal = 0;
+            
+            pendingOrders.forEach(order => {
+                if (order.total) {
+                    pendingTotal += parseCurrency(order.total);
+                } else if (order.itens) {
+                    order.itens.forEach(item => {
+                        pendingTotal += item.quantity * item.unitPrice;
+                    });
+                }
+            });
+            
+            completedOrders.forEach(order => {
+                if (order.total) {
+                    completedTotal += parseCurrency(order.total);
+                } else if (order.itens) {
+                    order.itens.forEach(item => {
+                        completedTotal += item.quantity * item.unitPrice;
+                    });
+                }
+            });
+
+            // Update dashboard elements
+            document.getElementById('pendingCount').textContent = pendingCount;
+            document.getElementById('completedCount').textContent = completedCount;
+            document.getElementById('pendingTotal').textContent = 'Total: ' + formatCurrency(pendingTotal);
+            document.getElementById('completedTotal').textContent = 'Total: ' + formatCurrency(completedTotal);
+        }
+
+        function toggleOrderStatus(orderId) {
+            const orders = getOrders();
+            const index = orders.findIndex(o => o.id === orderId);
+            if (index !== -1) {
+                orders[index].status = orders[index].status === 'Pendente' ? 'Realizado' : 'Pendente';
+                saveOrders(orders);
+                renderOrders(orders);
+                updateDashboard(orders);
+                if (window.ColorCartBuddy) {
+                    window.ColorCartBuddy.showSuccessMessage('Status do pedido atualizado com sucesso!');
+                }
+            }
+        }
+
+        function deleteOrder(orderId) {
+            if (confirm('Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.')) {
+                const orders = getOrders();
+                const filteredOrders = orders.filter(o => o.id !== orderId);
+                saveOrders(filteredOrders);
+                renderOrders(filteredOrders);
+                updateDashboard(filteredOrders);
+                if (window.ColorCartBuddy) {
+                    window.ColorCartBuddy.showSuccessMessage('Pedido excluído com sucesso!');
+                }
+            }
+        }
+
+        function formatCNPJInput(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 14) {
+                value = value.replace(/(\d{2})(\d)/, '$1.$2');
+                value = value.replace(/(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                value = value.replace(/(\d{2})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3/$4');
+                value = value.replace(/(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, '$1.$2.$3/$4-$5');
+            }
+            e.target.value = value;
+        }
+
+        function filterOrdersByCNPJ() {
+            const query = document.getElementById('searchCNPJ').value.trim().toLowerCase();
+            const orders = getOrders();
+            if (!query) {
+                renderOrders(orders);
+                updateDashboard(orders);
+                return;
+            }
+            const filtered = orders.filter(order => (order.cnpj || '').toLowerCase().includes(query));
+            renderOrders(filtered);
+            updateDashboard(filtered);
+        }
+    </script>
+</body>
+</html>
